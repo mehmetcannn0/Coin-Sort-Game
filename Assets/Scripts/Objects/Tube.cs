@@ -3,14 +3,14 @@ using UnityEngine;
 
 public class Tube : MonoBehaviour
 {
-    public List<Coin> coins;  
+    public List<Coin> coins;
     public Transform coinSlot;
     public bool isMerge { get; private set; }
 
     public List<Coin> selectedInTube;
 
 
- 
+
     public int GetLastCoinValue()
     {
         if (coins.Count > 0)
@@ -19,12 +19,12 @@ public class Tube : MonoBehaviour
         }
         else
         {
-            return 0; 
+            return 0;
         }
     }
 
 
-    public void SelectCoins(int emptySlotCount ) //0 ýse bos
+    public void SelectCoins(int emptySlotCount) //0 ýse bos
     {
         selectedInTube.Clear();
 
@@ -45,17 +45,17 @@ public class Tube : MonoBehaviour
                 }
 
             }
- 
 
-          
+
+
 
             selectedInTube.Reverse();
-                                  
+
             if (selectedInTube.Count > emptySlotCount)
             {
-                for (int i = 0; i<selectedInTube.Count-emptySlotCount ; i++)
+                for (int i = 0;  selectedInTube.Count > emptySlotCount; i++)
                 {
-                    selectedInTube.RemoveAt(0);
+                    selectedInTube.RemoveAt(0); 
                 }
             }
 
@@ -66,13 +66,13 @@ public class Tube : MonoBehaviour
         }
 
 
-         
+
     }
 
-   
+
 
     public void AddCoin(List<Coin> newCoins)
-    { 
+    {
 
         foreach (Coin coin in newCoins)
         {
@@ -85,7 +85,7 @@ public class Tube : MonoBehaviour
         if (coins.Count >= 10)
         {
             CheckMerge();
-           
+
         }
 
 
@@ -105,7 +105,7 @@ public class Tube : MonoBehaviour
             foreach (Coin item in coins)
             {
                 if (item.coinTypeData.value != coins[0].coinTypeData.value)
-                { 
+                {
 
                     isMerge = false;
                     return;
@@ -114,7 +114,7 @@ public class Tube : MonoBehaviour
 
 
             }
-          
+
 
             isMerge = true;
 
@@ -131,7 +131,7 @@ public class Tube : MonoBehaviour
     {
         foreach (Coin item in coins)
         {
-            Destroy(item.gameObject); 
+            Destroy(item.gameObject);
         }
         coins.Clear();
         isMerge = false;

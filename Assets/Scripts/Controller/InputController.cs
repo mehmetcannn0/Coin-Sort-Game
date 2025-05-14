@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputController : MonoBehaviour
@@ -29,7 +28,7 @@ public class InputController : MonoBehaviour
                             return;
                         }
                         firstTube = tube;
-                        Debug.Log("First Coin Value: " + firstCoinValue);
+
 
 
                     }
@@ -44,15 +43,15 @@ public class InputController : MonoBehaviour
                         }
                         secondCoinValue = tube.GetLastCoinValue();
                         secondTube = tube;
-                        firstTube.SelectCoins(10-secondTube.coins.Count);
-                        
+
+                        firstTube.SelectCoins(10 - secondTube.coins.Count);
+
 
                         if (secondCoinValue == 0 && firstCoinValue != 0) // 2. tube bos hepsýný tasý
                         {
-                            
+
                             secondTube.AddCoin(firstTube.selectedInTube);
-                                firstTube.RemoveCoin(firstTube.selectedInTube);
-                          
+                            firstTube.RemoveCoin(firstTube.selectedInTube);
 
                             ClearSelectedTube();
 
@@ -66,7 +65,8 @@ public class InputController : MonoBehaviour
                             if (secondTube.coins.Count <= 10)
                             {
                                 //eklenecek olana yer var mý 
-                                if (firstTube. selectedInTube.Count + secondTube.coins.Count <= 10)
+
+                                if (firstTube.selectedInTube.Count + secondTube.coins.Count <= 10)
                                 {
                                     secondTube.AddCoin(firstTube.selectedInTube);
                                     firstTube.RemoveCoin(firstTube.selectedInTube);
@@ -79,7 +79,7 @@ public class InputController : MonoBehaviour
 
                                 ClearSelectedTube();
 
-      
+
                             }
                             else
                             {
@@ -97,14 +97,7 @@ public class InputController : MonoBehaviour
                             ClearSelectedTube();
 
                         }
-
-                        
-
                     }
-
-
-
-
 
                 }
             }

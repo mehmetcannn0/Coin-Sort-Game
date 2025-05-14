@@ -11,11 +11,11 @@ public class LevelManager : MonoSingleton<LevelManager>
     {
         prefabManager = PrefabManager.Instance;
         tubeManager = TubeManager.Instance;
-        CreateLEvel();
+        CreateLevel();
 
     }
 
-    public void CreateLEvel()
+    public void CreateLevel()
     {
 
         foreach (Tube tube in tubeManager.tubes)

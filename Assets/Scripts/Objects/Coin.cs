@@ -11,9 +11,6 @@ public class Coin : MonoBehaviour
     private void Awake()
     {
         materialManager = MaterialManager.Instance;
-        
-         
-
 
     }
     public void Init(int value)
