@@ -47,6 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   coinText: {fileID: 6774682231465433265}
   coinRenderer: {fileID: 4983233679710932520}
+  CoinVisual: {fileID: 6725595583223666722}
 --- !u!1 &3131158132017991539
 GameObject:
   m_ObjectHideFlags: 0

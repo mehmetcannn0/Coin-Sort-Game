@@ -4,8 +4,7 @@ using UnityEngine;
 
 public class PrefabManager : MonoSingleton<PrefabManager>
 {
-    [SerializeField] private GameObject coinPrefab;
-   
+    [SerializeField] private GameObject coinPrefab;  
 
     public Coin InstantiateCoin(Vector3 objectPosition, Quaternion rotation, Transform parent)
     { 

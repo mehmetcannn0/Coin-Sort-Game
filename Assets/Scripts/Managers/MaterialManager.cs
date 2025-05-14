@@ -1,15 +1,19 @@
- 
+
 using System;
-using UnityEngine;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 public class MaterialManager : MonoSingleton<MaterialManager>
 {
-   
-    [SerializeField] private List<CoinTypeData> materials;
+    [SerializeField] private List<CoinTypeData> coinMaterials;
 
-    public CoinTypeData GetCoinTypeData(int requestedType) => materials.FirstOrDefault(x => x.value == requestedType);
+    public Material greyMaterial;
+    public Material tubeMaterial;
+    public Material rentedTubeMaterial;
+    public Material mergeableTubeMaterial;
+
+    public CoinTypeData GetCoinTypeData(int requestedType) => coinMaterials.FirstOrDefault(x => x.value == requestedType);
 }
 
 [Serializable]

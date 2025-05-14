@@ -7,6 +7,13 @@ public class InputController : MonoBehaviour
     [SerializeField] int secondCoinValue = 0;
     [SerializeField] Tube secondTube;
 
+    TubeManager tubeManager;
+
+    private void Start()
+    {
+        tubeManager = TubeManager.Instance;
+    }
+
     void Update()
     {
         if (Input.GetMouseButtonDown(0))
@@ -17,7 +24,7 @@ public class InputController : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 Tube tube = hit.collider.GetComponentInParent<Tube>();
-                if (tube != null)
+                if (tube != null && tubeManager.ContainTube(tube))
                 {
                     if (firstCoinValue == 0)
                     {
@@ -28,9 +35,7 @@ public class InputController : MonoBehaviour
                             return;
                         }
                         firstTube = tube;
-
-
-
+                        firstTube.SelectCoins(firstTube.Coins.Count, true);
                     }
                     else
                     {// selected ýn value su ýle suan ký secýlenýn valuesu esýt mý esýtse tasýma ýslemý yapýlmalý
@@ -44,68 +49,62 @@ public class InputController : MonoBehaviour
                         secondCoinValue = tube.GetLastCoinValue();
                         secondTube = tube;
 
-                        firstTube.SelectCoins(10 - secondTube.coins.Count);
-
+                        firstTube.SelectCoins(10 - secondTube.Coins.Count);
 
                         if (secondCoinValue == 0 && firstCoinValue != 0) // 2. tube bos hepsýný tasý
                         {
-
                             secondTube.AddCoin(firstTube.selectedInTube);
                             firstTube.RemoveCoin(firstTube.selectedInTube);
-
                             ClearSelectedTube();
-
-                            Debug.Log("2. secým slot bos");
-
                         }
 
 
                         else if (firstCoinValue == secondCoinValue)// secilenler ayný turde tasýma yapýlabýlýr
                         {
-                            if (secondTube.coins.Count <= 10)
+                            if (secondTube.Coins.Count <= 10)
                             {
-                                //eklenecek olana yer var mý 
-
-                                if (firstTube.selectedInTube.Count + secondTube.coins.Count <= 10)
+                                if (firstTube.selectedInTube.Count + secondTube.Coins.Count <= 10)
                                 {
                                     secondTube.AddCoin(firstTube.selectedInTube);
                                     firstTube.RemoveCoin(firstTube.selectedInTube);
                                 }
-                                else
-                                {
-
-                                    Debug.Log("turler ayný ama yeterý kadar yer yok");
-                                }
 
                                 ClearSelectedTube();
 
-
                             }
-                            else
-                            {
-                                Debug.Log("2. secým slot dolu ve ayný turde ama 10 uzerý coin var merge yapýlacak");
-                            }
-
-
-
 
                         }
-                        else // deselect islemi yapýlacak
+                        else
                         {
-                            Debug.Log("2. secým slot dolu ve farklý turde");
-
                             ClearSelectedTube();
 
                         }
                     }
 
                 }
+                else if (tube != null)
+                {
+
+                    if (tube.buyable)
+                    {
+                        tubeManager.BuyTube();
+                    }
+                    else if (tube.rentable)
+                    {
+                        tubeManager.RentTube();
+                    }
+                    else
+                    {
+                        Debug.Log("Tube not available for rent or buy.");
+                    }
+                }
+
             }
         }
     }
     public void ClearSelectedTube()
     {
-        firstTube.selectedInTube.Clear();
+        firstTube.ClearInTube();
         firstCoinValue = 0;
         secondCoinValue = 0;
         firstTube = null;
