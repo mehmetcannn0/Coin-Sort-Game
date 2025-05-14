@@ -62,7 +62,7 @@ public class LevelManager : MonoSingleton<LevelManager>
     public void Merge()
     {
         foreach (Tube tube in tubeManager.GetOpenedTubes())
-        {
+        {//combo //action
             if (tube.isMerge)
             {
                 int coinValue = tube.GetLastCoinValue();
