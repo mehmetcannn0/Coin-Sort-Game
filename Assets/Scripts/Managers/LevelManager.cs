@@ -31,14 +31,14 @@ public class LevelManager : MonoSingleton<LevelManager>
 
     public void CreateLevel()
     {
-        ActionController.AddGold?.Invoke(50);
+        ActionController.AddGold?.Invoke(500);
         ActionController.UpdateGoldUI?.Invoke();
 
         foreach (Tube tube in ActionController.GetOpenedTube?.Invoke())
         {
             for (int i = 0; i < Random.Range(3, 6); i++)
             {
-                Coin coin = ActionController.InstantiateCoin(new Vector3(0, 0, 2.5f - (i * 0.3f)), Quaternion.identity, tube.CoinSlot);
+                Coin coin = ActionController.GetCoin(new Vector3(0, 0, 2.5f - (i * 0.3f)), Quaternion.identity, tube.CoinSlot);
                 coin.Init(Random.Range(1, MergeScore + 1));
                 tube.Coins.Add(coin);
             }
@@ -71,7 +71,7 @@ public class LevelManager : MonoSingleton<LevelManager>
                 {
                     for (int i = 0; i <= Random.Range(0, tube.Coins.Count < 7 ? 4 : 10 - tube.Coins.Count); i++)
                     {
-                        Coin coin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.5f - (tube.Coins.Count * 0.3f)), Quaternion.identity, tube.CoinSlot);
+                        Coin coin = ActionController.GetCoin?.Invoke(new Vector3(0, 0, 2.5f - (tube.Coins.Count * 0.3f)), Quaternion.identity, tube.CoinSlot);
                         coin.Init(Random.Range(1, openedTubes.Count > MergeScore ? MergeScore + 1 : MergeScore));
                         tube.Coins.Add(coin);
                     }

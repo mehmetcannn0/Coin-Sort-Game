@@ -64,6 +64,7 @@ public class TubeManager : MonoSingleton<TubeManager>
         ActionController.BuyTube += BuyTube;
         ActionController.RentTube += RentTube;
         ActionController.ResetOpenedTube += ClearOpenedTubes;
+        ActionController.MoveRentTubeCoin += MoveRentTubeCoins;
     }
     private void OnDisable()
     {
@@ -74,6 +75,7 @@ public class TubeManager : MonoSingleton<TubeManager>
         ActionController.BuyTube -= BuyTube;
         ActionController.RentTube -= RentTube;
         ActionController.ResetOpenedTube -= ClearOpenedTubes;
+        ActionController.MoveRentTubeCoin -= MoveRentTubeCoins;
     }
 
     public bool ContainTube(Tube tube)
@@ -145,6 +147,23 @@ public class TubeManager : MonoSingleton<TubeManager>
             ActionController.RemoveGold?.Invoke(rentPrice);
         }
     }
+
+    public void MoveRentTubeCoins(Tube tube)
+    {
+        int index = 0;
+
+        while (10- openedTubes[index].Coins.Count< tube.Coins.Count )
+        {
+            index++;
+        }
+
+        openedTubes[index].AddCoin(tube.Coins);
+        tube.Coins.Clear();
+        //tube.RemoveCoin(tube.Coins);
+
+
+
+    }
 }
 public static partial class ActionController
 {
@@ -155,6 +174,7 @@ public static partial class ActionController
     public static Action RentTube;
     public static Action StartLevel;
     public static Action ResetOpenedTube;
+    public static Action<Tube> MoveRentTubeCoin;
 
 
 }

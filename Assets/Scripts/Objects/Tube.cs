@@ -30,9 +30,10 @@ public class Tube : MonoBehaviour
 
     MaterialManager materialManager;
     LevelManager levelManager;
-
+    ObjectPool objectPool;
     private void Awake()
     {
+        objectPool = ObjectPool.Instance;
         levelManager = LevelManager.Instance;
         materialManager = MaterialManager.Instance;
     }
@@ -165,11 +166,11 @@ public class Tube : MonoBehaviour
             int coinValue = GetLastCoinValue();
             DestroyCoins();
 
-            Coin coin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.5f), Quaternion.identity, CoinSlot);
+            Coin coin = ActionController.GetCoin?.Invoke(new Vector3(0, 0, 2.5f), Quaternion.identity, CoinSlot);
             coin.Init(coinValue + 1);
             if (coinValue == 9)
             {
-                Coin secondCoin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.2f), Quaternion.identity, CoinSlot);
+                Coin secondCoin = ActionController.GetCoin?.Invoke(new Vector3(0, 0, 2.2f), Quaternion.identity, CoinSlot);
                 secondCoin.Init(coinValue + 1);
                 Coins.Add(secondCoin);
 
@@ -200,7 +201,10 @@ public class Tube : MonoBehaviour
     {
         foreach (Coin item in Coins)
         {
-            Destroy(item.gameObject);
+            //Destroy(item.gameObject);
+            //objectPool.ReturnCoin(item);
+            ActionController.ReturnCoin?.Invoke(item);
+
         }
         Coins.Clear();
         isMerge = false;
@@ -242,13 +246,16 @@ public class Tube : MonoBehaviour
         //tubeManager.RemoveTube(this);
         ActionController.RemoveTube?.Invoke(this);
 
-        foreach (var item in Coins)
-        {
-            Destroy(item.gameObject);
+        
+        ActionController.MoveRentTubeCoin?.Invoke(this);
+        //foreach (var item in Coins)
+        //{
+        //    //Destroy(item.gameObject);
+        //    ActionController.ReturnCoin?.Invoke(item);
 
-        }
+        //}
 
-        Coins.Clear();
+        //Coins.Clear();
     }
 
    
@@ -298,7 +305,8 @@ public class Tube : MonoBehaviour
 
         foreach (Coin item in selectedInTube)
         {
-            Destroy(item.gameObject);
+            //Destroy(item.gameObject);
+            ActionController.ReturnCoin?.Invoke(item);
         }
 
         selectedInTube.Clear();
@@ -310,7 +318,8 @@ public class Tube : MonoBehaviour
 
         foreach (var item in Coins)
         {
-            Destroy(item.gameObject);
+            //Destroy(item.gameObject);
+            ActionController.ReturnCoin?.Invoke(item);
 
         }
         Coins.Clear();
@@ -326,7 +335,8 @@ public class Tube : MonoBehaviour
 
         foreach (var item in Coins)
         {
-            Destroy(item.gameObject);
+            //Destroy(item.gameObject);
+            ActionController.ReturnCoin?.Invoke(item);
 
         }
 
