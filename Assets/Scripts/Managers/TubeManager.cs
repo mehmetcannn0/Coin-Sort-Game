@@ -152,9 +152,26 @@ public class TubeManager : MonoSingleton<TubeManager>
     {
         int index = 0;
 
-        while (10- openedTubes[index].Coins.Count< tube.Coins.Count )
+        while (10 - openedTubes[index].Coins.Count < tube.Coins.Count)
         {
-            index++;
+            if (index < openedTubes.Count - 1)
+            {
+                index++;
+
+            }
+            else
+            {
+                foreach (var item in tube.Coins)
+                {
+                    //Destroy(item.gameObject);
+                    ActionController.ReturnCoin?.Invoke(item);
+
+                }
+
+                tube.Coins.Clear();
+                return;
+            }
+
         }
 
         openedTubes[index].AddCoin(tube.Coins);
