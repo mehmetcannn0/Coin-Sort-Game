@@ -4,14 +4,17 @@ using UnityEngine;
 public class PrefabManager : MonoSingleton<PrefabManager>
 {
     [SerializeField] private GameObject coinPrefab;
+
     private void OnEnable()
     {
         ActionController.InstantiateCoin += InstantiateCoin;
+
 
     }
     private void OnDisable()
     {
         ActionController.InstantiateCoin -= InstantiateCoin;
+
     }
 
     public Coin InstantiateCoin(Vector3 objectPosition, Quaternion rotation, Transform parent)

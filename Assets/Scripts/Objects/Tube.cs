@@ -160,6 +160,7 @@ public class Tube : MonoBehaviour
 
         if (isMerge)
         {
+            ActionController.PlayMergeEffect?.Invoke(CoinSlot.position);
             Debug.Log("in merge  " + levelManager.MergeCombo);
             int coinValue = GetLastCoinValue();
             DestroyCoins();
