@@ -18,6 +18,11 @@ public class Coin : MonoBehaviour
 
     public void Init(int value)
     {
+        if (value>=10)
+        {
+            value = 9;
+        }
+
         CoinTypeData = materialManager.GetCoinTypeData(value);
         coinText.text = CoinTypeData.value.ToString();
         coinRenderer.material = CoinTypeData.material;

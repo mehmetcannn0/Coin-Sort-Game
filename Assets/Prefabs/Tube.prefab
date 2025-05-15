@@ -988,7 +988,7 @@ MonoBehaviour:
   buyable: 0
   rentable: 0
   rentTimeText: {fileID: 3800322971346070327}
-  rentDuration: 3
+  rentDuration: 60
   selectedInTube: []
 --- !u!1 &8477898197915383055
 GameObject:

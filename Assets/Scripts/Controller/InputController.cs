@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class InputController : MonoBehaviour
@@ -6,17 +7,15 @@ public class InputController : MonoBehaviour
     [SerializeField] Tube firstTube;
     [SerializeField] int secondCoinValue = 0;
     [SerializeField] Tube secondTube;
-
-    TubeManager tubeManager;
-
-    private void Start()
+    GameManager gameManager;
+    private void Awake()
     {
-        tubeManager = TubeManager.Instance;
+        gameManager = GameManager.Instance;
     }
 
     void Update()
     {
-        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began && !gameManager.IsGameOver)
         {
             Ray ray = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
             RaycastHit hit;
@@ -24,7 +23,7 @@ public class InputController : MonoBehaviour
             if (Physics.Raycast(ray, out hit))
             {
                 Tube tube = hit.collider.GetComponentInParent<Tube>();
-                if (tube != null && tubeManager.ContainTube(tube))
+                if (tube != null && ActionController.ContainThisTube.Invoke(tube))
                 {
                     if (firstCoinValue == 0)
                     {
@@ -57,8 +56,6 @@ public class InputController : MonoBehaviour
                             firstTube.RemoveCoin(firstTube.selectedInTube);
                             ClearSelectedTube();
                         }
-
-
                         else if (firstCoinValue == secondCoinValue)// secilenler ayný turde tasýma yapýlabýlýr
                         {
                             if (secondTube.Coins.Count <= 10)
@@ -68,30 +65,28 @@ public class InputController : MonoBehaviour
                                     secondTube.AddCoin(firstTube.selectedInTube);
                                     firstTube.RemoveCoin(firstTube.selectedInTube);
                                 }
-
                                 ClearSelectedTube();
-
                             }
-
                         }
                         else
                         {
                             ClearSelectedTube();
-
                         }
+                          
+                        ActionController.SetZeroMergeCombo?.Invoke();   
+                        ActionController.CheckMerge?.Invoke();
                     }
-
                 }
                 else if (tube != null)
                 {
 
                     if (tube.buyable)
                     {
-                        tubeManager.BuyTube();
+                        ActionController.BuyTube?.Invoke();
                     }
                     else if (tube.rentable)
                     {
-                        tubeManager.RentTube();
+                        ActionController.RentTube?.Invoke();
                     }
                     else
                     {

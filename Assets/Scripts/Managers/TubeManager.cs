@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,6 +28,7 @@ public class TubeManager : MonoSingleton<TubeManager>
 
     private void StartLevel()
     {
+
         for (int i = 0; i < 3; i++)
         {
             tubes[0].Buy();
@@ -37,7 +39,41 @@ public class TubeManager : MonoSingleton<TubeManager>
         }
         tubes[0].ShowBuyUI(buyPrice);
         tubes[1].ShowRentUI(rentPrice);
-        ActionbController.StartLevel.Invoke();
+        ActionController.CreateLevel?.Invoke();
+    }
+
+    public void ClearOpenedTubes()
+    {
+        buyPrice = 20;
+        rentPrice = 10;
+        openedTubes.Reverse();
+        foreach (Tube tube in openedTubes)
+        {
+            tubes.Insert(0, tube);
+        }
+        openedTubes.Clear();
+
+    }
+
+    private void OnEnable()
+    {
+        ActionController.StartLevel += StartLevel;
+        ActionController.GetOpenedTube += GetOpenedTubes;
+        ActionController.ContainThisTube += ContainTube;
+        ActionController.RemoveTube += RemoveTube;
+        ActionController.BuyTube += BuyTube;
+        ActionController.RentTube += RentTube;
+        ActionController.ResetOpenedTube += ClearOpenedTubes;
+    }
+    private void OnDisable()
+    {
+        ActionController.StartLevel -= StartLevel;
+        ActionController.GetOpenedTube -= GetOpenedTubes;
+        ActionController.ContainThisTube -= ContainTube;
+        ActionController.RemoveTube -= RemoveTube;
+        ActionController.BuyTube -= BuyTube;
+        ActionController.RentTube -= RentTube;
+        ActionController.ResetOpenedTube -= ClearOpenedTubes;
     }
 
     public bool ContainTube(Tube tube)
@@ -76,8 +112,8 @@ public class TubeManager : MonoSingleton<TubeManager>
                 tubes[0].Buy();
                 openedTubes.Add(tubes[0]);
                 tubes.RemoveAt(0);
-                ActionbController.RemoveGold(buyPrice);
-                buyPrice += 20;
+                ActionController.RemoveGold?.Invoke(buyPrice);
+                buyPrice *= 2;
 
                 if (tubes.Count >= 1)
                 {
@@ -106,7 +142,19 @@ public class TubeManager : MonoSingleton<TubeManager>
             rentedTube.Rent();
             openedTubes.Add(rentedTube);
             tubes.Remove(rentedTube);
-            ActionbController.RemoveGold(rentPrice);
+            ActionController.RemoveGold?.Invoke(rentPrice);
         }
     }
+}
+public static partial class ActionController
+{
+    public static Func<List<Tube>> GetOpenedTube;
+    public static Func<Tube, bool> ContainThisTube;
+    public static Action<Tube> RemoveTube;
+    public static Action BuyTube;
+    public static Action RentTube;
+    public static Action StartLevel;
+    public static Action ResetOpenedTube;
+
+
 }

@@ -1,6 +1,7 @@
 
 
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -28,13 +29,24 @@ public class Tube : MonoBehaviour
     public List<Coin> selectedInTube;
 
     MaterialManager materialManager;
-    TubeManager tubeManager;
+    LevelManager levelManager;
 
     private void Awake()
     {
-        tubeManager = TubeManager.Instance;
-
+        levelManager = LevelManager.Instance;
         materialManager = MaterialManager.Instance;
+    }
+    private void OnEnable()
+    {
+        ActionController.CheckMerge += CheckMerge;
+        ActionController.MergeTube += MergeTube;
+        ActionController.ReGenerateTubes += ReGenerateTube;
+    }
+    private void OnDisable()
+    {
+        ActionController.CheckMerge -= CheckMerge;
+        ActionController.MergeTube -= MergeTube;
+        ActionController.ReGenerateTubes -= ReGenerateTube;
     }
 
     public int GetLastCoinValue()
@@ -90,15 +102,12 @@ public class Tube : MonoBehaviour
         foreach (Coin coin in newCoins)
         {
             coin.transform.SetParent(CoinSlot);
-            coin.transform.DOLocalMove(new Vector3(0, 0, 2.5f - (Coins.Count * 0.3f)),0.5f);
+            coin.transform.DOLocalMove(new Vector3(0, 0, 2.5f - (Coins.Count * 0.3f)), 0.5f);
             coin.CoinVisual.transform.DOLocalMove(Vector3.zero, 0.1f);
 
             Coins.Add(coin);
         }
-        if (Coins.Count >= 10)
-        {
-            CheckMerge();
-        }
+
     }
 
     public void RemoveCoin(List<Coin> newCoins)
@@ -107,11 +116,12 @@ public class Tube : MonoBehaviour
         {
             Coins.Remove(coin);
         }
-        CheckMerge();
+
     }
 
     public void CheckMerge()
     {
+
         if (Coins.Count >= 10)
         {
             foreach (Coin item in Coins)
@@ -132,6 +142,7 @@ public class Tube : MonoBehaviour
                 UpdateTubeMaterial(materialManager.mergeableTubeMaterial);
             }
             isMerge = true;
+            levelManager.MergeCombo++;
 
         }
         else
@@ -144,6 +155,36 @@ public class Tube : MonoBehaviour
         }
     }
 
+    private void MergeTube()
+    {
+
+        if (isMerge)
+        {
+            Debug.Log("in merge  " + levelManager.MergeCombo);
+            int coinValue = GetLastCoinValue();
+            DestroyCoins();
+
+            Coin coin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.5f), Quaternion.identity, CoinSlot);
+            coin.Init(coinValue + 1);
+            if (coinValue == 9)
+            {
+                Coin secondCoin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.2f), Quaternion.identity, CoinSlot);
+                secondCoin.Init(coinValue + 1);
+                Coins.Add(secondCoin);
+
+            }
+            //mergeScore = coinValue + 1;
+            if (coinValue + 1 > levelManager.MergeScore)
+            {
+                levelManager.MergeScore = coinValue + 1;
+                ActionController.AddGold?.Invoke(coinValue * 20);
+            }
+
+            Coins.Add(coin);
+
+            ActionController.AddGold?.Invoke(coinValue * 10 * levelManager.MergeCombo);
+        }
+    }
     public void ClearInTube()
     {
         foreach (Coin item in selectedInTube)
@@ -164,7 +205,7 @@ public class Tube : MonoBehaviour
         isMerge = false;
         UpdateTubeMaterial(isRented ? materialManager.rentedTubeMaterial : materialManager.tubeMaterial);
     }
-  
+
     public void UpdateTubeMaterial(Material newMaterial)
     {
         tubeRenderer.material = newMaterial;
@@ -197,7 +238,8 @@ public class Tube : MonoBehaviour
         rentTimeText.gameObject.SetActive(false);
         isRented = false;
 
-        tubeManager.RemoveTube(this);
+        //tubeManager.RemoveTube(this);
+        ActionController.RemoveTube?.Invoke(this);
 
         foreach (var item in Coins)
         {
@@ -208,6 +250,8 @@ public class Tube : MonoBehaviour
         Coins.Clear();
     }
 
+   
+
     public void Buy()
     {
         isRented = false;
@@ -217,6 +261,7 @@ public class Tube : MonoBehaviour
         UpdateTubeMaterial(materialManager.tubeMaterial);
         rentUI.SetActive(false);
         buyUI.SetActive(false);
+    
     }
 
     public void ShowBuyUI(int price)
@@ -238,5 +283,61 @@ public class Tube : MonoBehaviour
         rentPriceText.text = price.ToString();
         UpdateTubeMaterial(materialManager.greyMaterial);
     }
+    public void ReGenerateTube()
+    {
+        if (isRented)
+        {
+            CancleRent();
+
+        }
+        isRented = false;
+        isMerge = false;
+        rentable = false;
+        buyable = false;
+
+        foreach (Coin item in selectedInTube)
+        {
+            Destroy(item.gameObject);
+        }
+
+        selectedInTube.Clear();
+
+        UpdateTubeMaterial(materialManager.greyMaterial);
+
+        rentUI.SetActive(false);
+        buyUI.SetActive(false);
+
+        foreach (var item in Coins)
+        {
+            Destroy(item.gameObject);
+
+        }
+        Coins.Clear();
+    }
+    public void CancleRent()
+    {
+        StopAllCoroutines();
+        rentTimeText.gameObject.SetActive(false);
+        isRented = false;
+
+        //tubeManager.RemoveTube(this);
+        ActionController.RemoveTube?.Invoke(this);
+
+        foreach (var item in Coins)
+        {
+            Destroy(item.gameObject);
+
+        }
+
+        Coins.Clear();
+    }
+
+}
+
+public static partial class ActionController
+{
+    public static Action CheckMerge;
+    public static Action MergeTube;
+    public static Action ReGenerateTubes;
 
 }

@@ -1,91 +1,144 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class LevelManager : MonoSingleton<LevelManager>
 {
-    private int mergeScore = 2;
+    public int MergeScore = 2;
+    public int MergeCombo = 0;
 
-    TubeManager tubeManager;
-    PrefabManager prefabManager;
+    GameManager gameManager;
 
-
-    void Start()
+    private void Start()
     {
-        prefabManager = PrefabManager.Instance;
-        tubeManager = TubeManager.Instance;
+        gameManager = GameManager.Instance;
+
     }
+
 
     private void OnEnable()
     {
-        ActionbController.StartLevel += CreateLevel;
+        ActionController.CreateLevel += CreateLevel;
+        ActionController.SetZeroMergeCombo += SetZeroMergeCombo;
     }
 
     private void OnDisable()
     {
-        ActionbController.StartLevel -= CreateLevel;
+        ActionController.CreateLevel -= CreateLevel;
+        ActionController.SetZeroMergeCombo -= SetZeroMergeCombo;
     }
 
     public void CreateLevel()
     {
+        ActionController.AddGold?.Invoke(50);
+        ActionController.UpdateGoldUI?.Invoke();
 
-        foreach (Tube tube in tubeManager.GetOpenedTubes())
+        foreach (Tube tube in ActionController.GetOpenedTube?.Invoke())
         {
             for (int i = 0; i < Random.Range(3, 6); i++)
             {
-                Coin coin = prefabManager.InstantiateCoin(new Vector3(0, 0, 2.5f - (i * 0.3f)), Quaternion.identity, tube.CoinSlot);
-                coin.Init(Random.Range(1, mergeScore + 1));
+                Coin coin = ActionController.InstantiateCoin(new Vector3(0, 0, 2.5f - (i * 0.3f)), Quaternion.identity, tube.CoinSlot);
+                coin.Init(Random.Range(1, MergeScore + 1));
                 tube.Coins.Add(coin);
             }
         }
+    }
+
+    public void RestartLevel()
+    {
+        ActionController.ReGenerateTubes?.Invoke();
+        ActionController.ResetOpenedTube?.Invoke();
+        gameManager.RestartGame(); // degerlerý sýfýrladý
+        MergeScore = 2;
+        MergeCombo = 0;
+
+        ActionController.StartLevel?.Invoke();
     }
 
     public void Deal()
     {
-
-        foreach (Tube tube in tubeManager.GetOpenedTubes())
+        bool anyAdded = false;
+        if (ActionController.RemoveGold.Invoke(10))
         {
-            if (tube.Coins.Count < 10)
+            MergeCombo = 0;
+
+            List<Tube> openedTubes = ActionController.GetOpenedTube?.Invoke();
+
+            foreach (Tube tube in openedTubes)
             {
-                for (int i = 0; i <= Random.Range(0, tube.Coins.Count < 7 ? 4 : 10 - tube.Coins.Count); i++)
+                if (tube.Coins.Count < 10)
                 {
-                    Coin coin = prefabManager.InstantiateCoin(new Vector3(0, 0, 2.5f - (tube.Coins.Count * 0.3f)), Quaternion.identity, tube.CoinSlot);
-                    coin.Init(Random.Range(1, tubeManager.GetOpenedTubes().Count > mergeScore ? mergeScore + 1 : mergeScore));
-                    tube.Coins.Add(coin);
+                    for (int i = 0; i <= Random.Range(0, tube.Coins.Count < 7 ? 4 : 10 - tube.Coins.Count); i++)
+                    {
+                        Coin coin = ActionController.InstantiateCoin?.Invoke(new Vector3(0, 0, 2.5f - (tube.Coins.Count * 0.3f)), Quaternion.identity, tube.CoinSlot);
+                        coin.Init(Random.Range(1, openedTubes.Count > MergeScore ? MergeScore + 1 : MergeScore));
+                        tube.Coins.Add(coin);
+                    }
+                    anyAdded = true;
                 }
-                tube.CheckMerge();
             }
+            if (!anyAdded)
+            {
+                //hic ekleme yaðilmadi
+                Debug.Log("No coins added");
+                ActionController.CheckMerge?.Invoke();
+                ActionController.MergeTube?.Invoke();
+                gameManager.GameOver();
+                Deal();
+
+                return;
+            }
+
+            ActionController.CheckMerge?.Invoke();
+            gameManager.ResumeGame();
         }
-        ActionbController.RemoveGold(10);
+        else
+        { // deal ýcýn para yetmedý merge varmý bakýlacak
+            if (!gameManager.IsGameOver)
+            {
+                Debug.Log(" deal before Game Over");
+                ActionController.CheckMerge?.Invoke();
+                ActionController.MergeTube?.Invoke();
+                gameManager.GameOver();
+                Deal();
+
+
+
+            } // merge ýle para kazanma
+            else
+            {
+                Debug.Log(" Game Over");
+                ActionController.GameOver?.Invoke();
+                // open game over menu  
+
+                //ActionController.GameOver?.Invoke();
+
+
+
+            }
+
+        }
+    }
+    public void SetZeroMergeCombo()
+    {
+        MergeCombo = 0;
+
     }
 
     public void Merge()
     {
-        foreach (Tube tube in tubeManager.GetOpenedTubes())
-        {//combo //action
-            if (tube.isMerge)
-            {
-                int coinValue = tube.GetLastCoinValue();
-                tube.DestroyCoins();
-
-                Coin coin = prefabManager.InstantiateCoin(new Vector3(0, 0, 2.5f), Quaternion.identity, tube.CoinSlot);
-                coin.Init(coinValue + 1);
-                //mergeScore = coinValue + 1;
-                if (coinValue + 1 > mergeScore)
-                {
-                    mergeScore = coinValue + 1;
-                    ActionbController.AddGold(coinValue * 20);
-                }
-
-                tube.Coins.Add(coin);
-
-                ActionbController.AddGold(coinValue * 10);
-            }
-        }
+        ActionController.MergeTube?.Invoke();
+        Debug.Log("merge den sonra combo " + MergeCombo);
+        MergeCombo = 0;
     }
+
+
 }
 
-public static partial class ActionbController
+public static partial class ActionController
 {
-    public static Action StartLevel;
+    public static Action CreateLevel;
+    public static Action SetZeroMergeCombo;
+
 }

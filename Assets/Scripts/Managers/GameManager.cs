@@ -1,37 +1,64 @@
+
+
 using System;
+using UnityEngine;
 
 public class GameManager : MonoSingleton<GameManager>
 {
+    public int Gold { get; private set; }
+    public bool IsGameOver { get; private set; }
 
-    public int Gold { get; private set; }  
-
-     
     private void OnEnable()
     {
-        ActionbController.AddGold += AddGold;
-        ActionbController.RemoveGold += RemoveGold;
-    }
-    private void OnDisable()
-    {
-        ActionbController.AddGold -= AddGold;
-        ActionbController.RemoveGold -= RemoveGold;
+        ActionController.AddGold += AddGold;
+        ActionController.RemoveGold += RemoveGold;
     }
 
+    private void OnDisable()
+    {
+        ActionController.AddGold -= AddGold;
+        ActionController.RemoveGold -= RemoveGold;
+    }
 
     private void AddGold(int amount)
     {
         Gold += amount;
 
-        ActionbController.UpdateGoldUI?.Invoke();
+        ActionController.UpdateGoldUI?.Invoke();
     }
-    private void RemoveGold(int amount)
+
+    private bool RemoveGold(int amount)
     {
+        if (Gold < amount)
+        {
+            Debug.Log("Not enough gold");
+            return false;
+        }
         Gold -= amount;
-        ActionbController.UpdateGoldUI?.Invoke();
+        ActionController.UpdateGoldUI?.Invoke();
+
+        return true;
+    }
+    public void GameOver()
+    {
+        IsGameOver = true;
+    }
+    public void ResumeGame()
+    {
+        IsGameOver = false;
+    }
+    public void RestartGame()
+    {
+        Gold = 0;        
+        IsGameOver = false;
+        ActionController.UpdateGoldUI?.Invoke();
     }
 }
-public static partial class ActionbController
+
+public static partial class ActionController
 {
     public static Action<int> AddGold;
-    public static Action<int> RemoveGold;
+    public static Func<int, bool> RemoveGold;
+    public static Action GameOver;
+
 }
